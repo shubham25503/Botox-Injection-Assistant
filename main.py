@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from face_detection import face_detection_router
+from face_detection1 import face_detection_router
 
 app = FastAPI(title="Botox-Injection-Predictor")
 
