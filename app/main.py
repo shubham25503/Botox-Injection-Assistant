@@ -1,11 +1,12 @@
 from fastapi import FastAPI
+from app.routes.auth_routes import router as auth_router
 from fastapi.responses import JSONResponse
-from face_detection1 import face_detection_router
+
 
 app = FastAPI(title="Botox-Injection-Predictor")
 
-# Include the video feed route
-app.include_router(face_detection_router, tags=["face_detection"])
+
+app.include_router(auth_router, prefix="/auth")
 
 @app.get("/")
 async def root():
