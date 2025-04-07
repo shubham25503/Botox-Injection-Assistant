@@ -1,10 +1,23 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
+from datetime import datetime
 
-class UserCreate(BaseModel):
-    username: str
+class UserSignup(BaseModel):
+    username:str
     email: EmailStr
     password: str
+    plan: str  # monthly, semiannual, annual
+
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
+
+class UserEdit(BaseModel):
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+
+class UserOut(BaseModel):
+    email: EmailStr
+    access_code: Optional[str]
+    access_expires: Optional[datetime]
