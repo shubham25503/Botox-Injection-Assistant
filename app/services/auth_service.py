@@ -61,6 +61,8 @@ async def authenticate_user(email: str, password: str):
     user = await users_collection.find_one({"email": email})
     if not user or not pwd_context.verify(password, user["password"]):
         return None
+    if not user["is_admin"] and user["access_expires"] < datetime.now():
+        raise Exception("Access expired. Please renew.")
     return create_jwt_token({"email": user["email"]})
 
 def hash_password(password: str) -> str:

@@ -4,7 +4,7 @@ from app.services.auth_service import create_user, authenticate_user,  update_us
 from app.utils.jwt_handler import get_current_user_email
 from fastapi.security import OAuth2PasswordRequestForm
 
-router = APIRouter()
+router = APIRouter(tags=["auth"])
 
 
 @router.post("/signup", response_model=UserOut)
@@ -28,18 +28,6 @@ async def login(user: UserLogin):
         raise HTTPException(status_code=401, detail=str(e))
 
 
-@router.put("/edit", response_model=UserOut)
-async def edit_user(data: UserEdit, user_email: str = Depends(get_current_user_email)):
-    try:
-        print(user_email)
-        updated = await update_user(user_email, data)
-        return updated
-    except Exception as e:
-        print("edit", e)
-        raise HTTPException(status_code=400, detail=str(e))
-    
-
-
 @router.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
@@ -50,3 +38,15 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     except Exception as e:
         print("login", e)
         raise HTTPException(status_code=401, detail=str(e))
+
+
+@router.put("/edit", response_model=UserOut)
+async def edit_user(data: UserEdit, user_email: str = Depends(get_current_user_email)):
+    try:
+        print(user_email)
+        updated = await update_user(user_email, data)
+        return updated
+    except Exception as e:
+        print("edit", e)
+        raise HTTPException(status_code=400, detail=str(e))
+    

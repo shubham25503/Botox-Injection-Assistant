@@ -14,8 +14,10 @@ class UserLogin(BaseModel):
     password: str
 
 class UserEdit(BaseModel):
+    username:Optional[str]
     email: Optional[EmailStr] = None
     password: Optional[str] = None
+    access_expires :  Optional[datetime]
 
 class UserOut(BaseModel):
     email: EmailStr
