@@ -1,11 +1,15 @@
 from passlib.context import CryptContext
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 # from app.models.user import users_collection
 from app.models.user import User
 from app.schemas.user_schema import UserSignup, UserEdit
 from datetime import datetime, timedelta
 from app.utils.jwt_handler import create_jwt_token
 from app.database import db
-import uuid
+import uuid, random, string
+from app.config import SMTP_USERNAME, SMTP_SERVER, SMTP_PORT, SMTP_PASSWORD
 
 
 users_collection = db["users"]
@@ -71,6 +75,58 @@ def hash_password(password: str) -> str:
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
+
+
+async def forgot_password(email: str):
+    existing_user = await users_collection.find_one({"email": email})
+    if not existing_user:
+        raise Exception("User doesn't exist")
+
+    # 1. Generate a temporary password
+    temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    hashed_temp_password = hash_password(temp_password)
+     # 2. Update password in the database
+    await users_collection.update_one(
+        {"email": email},
+        {"$set": {"password": hashed_temp_password}}
+    )
+
+    # 3. Send an email with the temporary password
+    subject = "Your Temporary Password"
+    sender_email = SMTP_USERNAME
+    receiver_email = email
+
+    html_content = f"""
+    <html>
+        <body>
+            <h3>Hello {existing_user.get("username", "User")},</h3>
+            <p>You requested a password reset. Here's your temporary password:</p>
+            <p><b>{temp_password}</b></p>
+            <p>Please login using this password and update it immediately.</p>
+            <br>
+            <p>Thanks,<br>Support Team</p>
+        </body>
+    </html>
+    """
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = subject
+    message["From"] = sender_email
+    message["To"] = receiver_email
+
+    part = MIMEText(html_content, "html")
+    message.attach(part)
+    try:
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(SMTP_USERNAME, SMTP_PASSWORD)
+        server.sendmail(sender_email, receiver_email, message.as_string())
+        server.quit()
+        print("Temporary password email sent.")
+    except Exception as e:
+        print("Error sending email:", str(e))
+        raise Exception("Failed to send temporary password email")
+    
 
 # async def create_user(user_data):
 #     existing_user = await users_collection.find_one({"email": user_data.email})

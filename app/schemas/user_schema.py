@@ -23,3 +23,6 @@ class UserOut(BaseModel):
     email: EmailStr
     access_code: Optional[str]
     access_expires: Optional[datetime]
+
+class ResetPassword(BaseModel):
+    email: EmailStr
