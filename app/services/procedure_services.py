@@ -31,7 +31,7 @@ async def update_procedure(procedure_id:str,data:ProcedureEdit):
         # Ensure it's datetime object
         update_data["procedure_date"] = datetime.combine(update_data["procedure_date"], datetime.min.time())
 
-    # update_data["updated_at"] = datetime.utcnow()
+    # update_data["updated_at"] = datetime.now()
 
     result = await procedure_collection.update_one(
         {"_id": ObjectId(procedure_id)},
