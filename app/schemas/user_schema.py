@@ -21,7 +21,7 @@ class UserEdit(BaseModel):
 
 class UserOut(BaseModel):
     email: EmailStr
-    token: str
+    access_token: str
     # access_code: Optional[str]
     # access_expires: Optional[datetime]
 
