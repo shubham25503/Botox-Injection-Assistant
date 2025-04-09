@@ -6,7 +6,7 @@ class UserSignup(BaseModel):
     username:str
     email: EmailStr
     password: str
-    plan: str  # monthly, semiannual, annual
+    plan: str = "monthly" # monthly, semiannual, annual
 
 
 class UserLogin(BaseModel):
