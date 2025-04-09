@@ -3,8 +3,19 @@ from app.routes.auth_routes import router as auth_router
 from fastapi.responses import JSONResponse
 from app.routes.procedure_routes import router as procedure_router
 from app.routes.image_data_routes import router as image_router
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="Botox-Injection-Predictor")
 
+origins = [
+    "http://localhost:5173"
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,            
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
