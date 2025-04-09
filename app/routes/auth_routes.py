@@ -59,7 +59,7 @@ async def edit_user(data: UserEdit, user_email: str = Depends(get_current_user_e
         raise HTTPException(status_code=400, detail=str(e))
     
 
-@router.get("/get-data", response_model=UserOut2)
+@router.get("/user/details", response_model=UserOut2)
 async def get_user_data(user_email:str = Depends(get_current_user_email)):
     try:
         return await get_data(user_email)
