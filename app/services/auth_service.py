@@ -39,9 +39,10 @@ async def create_user(user_data: UserSignup, is_admin=False):
         access_expires=access_expires,
         access_code=access_code,
     )
-    print(user.dict())
+    # print(user.dict())
     await users_collection.insert_one(user.dict())
-    return  user
+    token = create_jwt_token({"email": user.email})
+    return {**user.dict(), "token": token}
 
 
 async def update_user(email: str, user_update: UserEdit):
