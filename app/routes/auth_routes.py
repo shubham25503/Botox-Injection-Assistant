@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas.user_schema import UserLogin, UserOut, UserSignup, UserEdit, ResetPassword
-from app.services.auth_service import create_user, authenticate_user,  update_user, forgot_password
+from app.schemas.user_schema import UserLogin, UserOut, UserSignup, UserEdit, ResetPassword, UserOut2
+from app.services.auth_service import create_user, authenticate_user,  update_user, forgot_password, get_data
 from app.utils.jwt_handler import get_current_user_email
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -51,10 +51,19 @@ async def reset_password(data: ResetPassword):
 @router.put("/edit", response_model=UserOut)
 async def edit_user(data: UserEdit, user_email: str = Depends(get_current_user_email)):
     try:
-        print(user_email)
+        # print(user_email)
         updated = await update_user(user_email, data)
         return updated
     except Exception as e:
         print("edit", e)
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@router.get("/get-data", response_model=UserOut2)
+async def get_user_data(user_email:str = Depends(get_current_user_email)):
+    try:
+        return await get_data(user_email)
+    except Exception as e:
+        print("get-data", e)
         raise HTTPException(status_code=400, detail=str(e))
     

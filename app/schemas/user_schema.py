@@ -27,3 +27,11 @@ class UserOut(BaseModel):
 
 class ResetPassword(BaseModel):
     email: EmailStr
+
+class UserOut2(BaseModel):
+    username: str
+    email: EmailStr
+    # password: str
+    is_admin: bool 
+    access_code: Optional[str] = None
+    access_expires: Optional[datetime] = None

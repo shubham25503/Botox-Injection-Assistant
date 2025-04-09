@@ -76,6 +76,11 @@ def hash_password(password: str) -> str:
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
+async def get_data(email):
+    existing_user= await users_collection.find_one({"email": email})
+    if not existing_user:
+        raise Exception("User doesn't exist")
+    return existing_user
 
 
 async def forgot_password(email: str):
