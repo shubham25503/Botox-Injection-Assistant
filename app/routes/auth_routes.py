@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 router = APIRouter(tags=["auth"])
 
 
-@router.post("/signup", response_model=UserOut)
+@router.post("/signup")
 async def signup(user: UserSignup):
     try:
         new_user =await create_user(user)
