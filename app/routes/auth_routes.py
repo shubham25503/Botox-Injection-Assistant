@@ -39,7 +39,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         print("login", e)
         raise HTTPException(status_code=401, detail=str(e))
 
-@router.post("/reset_password")
+@router.post("/reset-password")
 async def reset_password(data: ResetPassword):
     try:
         await forgot_password(data.email)
