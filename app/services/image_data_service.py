@@ -12,7 +12,7 @@ async def create_image_data(procedure_id: str, user: str, data):
     # print(procedure_id,doctor_data,data)
     doctor_data=await users_collection.find_one({"email":user["email"]})
     doctor_id=doctor_data["_id"]
-    print(doctor_id)
+    # print(doctor_id)
     procedure = await procedure_collection.find_one({"_id": ObjectId(procedure_id)})
     if not procedure:
         raise Exception("Procedure not found.")
@@ -32,7 +32,7 @@ async def create_image_data(procedure_id: str, user: str, data):
     return str(result.inserted_id)
 
 async def update_image_data(procedure_id: str, data):
-    print(procedure_id)
+    # print(procedure_id)
     new_doses = [dose.dict() for dose in data.doses]
 
     result = await image_data_collection.update_one(

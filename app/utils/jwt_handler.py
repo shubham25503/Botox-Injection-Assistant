@@ -19,7 +19,7 @@ def create_jwt_token(data: dict):
 def get_current_user_email(token: str = Depends(oauth2_scheme)) -> str:
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        print(payload)
+        # print(payload)
         # print(payload.get("sub"))
         return payload.get("email")
     except JWTError:

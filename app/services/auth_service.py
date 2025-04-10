@@ -41,7 +41,10 @@ async def create_user(user_data: UserSignup, is_admin=False):
     )
     # print(user.dict())
     await users_collection.insert_one(user.dict())
-    token = create_jwt_token({"email": user.email})
+    token = create_jwt_token({
+        "email": user.email,
+        "is_admin":user.is_admin
+        })
     return {**user.dict(), "access_token": token}
 
 
@@ -68,7 +71,10 @@ async def authenticate_user(email: str, password: str):
         return None
     # if not user["is_admin"] and user["access_expires"] < datetime.now():
     #     raise Exception("Access expired. Please renew.")
-    return create_jwt_token({"email": user["email"]})
+    return create_jwt_token({
+        "email": user["email"],
+        "is_admin": user["is_admin"]
+        })
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)

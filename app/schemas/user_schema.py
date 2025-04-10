@@ -35,3 +35,7 @@ class UserOut2(BaseModel):
     is_admin: bool 
     # access_code: Optional[str] = None
     # access_expires: Optional[datetime] = None
+
+class UserBase(BaseModel):
+    email : EmailStr
+    is_admin : bool
