@@ -29,6 +29,7 @@ class ResetPassword(BaseModel):
     email: EmailStr
 
 class UserOut2(BaseModel):
+    id:str
     username: str
     email: EmailStr
     # password: str

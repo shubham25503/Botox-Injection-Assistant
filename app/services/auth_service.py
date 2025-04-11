@@ -83,6 +83,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 async def get_data(email):
     existing_user= await users_collection.find_one({"email": email})
+    existing_user["id"]=str(existing_user["_id"])
     if not existing_user:
         raise Exception("User doesn't exist")
     return existing_user
