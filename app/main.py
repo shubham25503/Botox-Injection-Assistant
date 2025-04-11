@@ -5,6 +5,7 @@ from app.routes.procedure_routes import router as procedure_router
 from app.routes.image_data_routes import router as image_router
 from app.routes.plan_routes import router as plan_router
 from app.routes.stripe_routes import router as stripe_routes
+from app.routes.admin_user_routes import router as admin_user_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -28,9 +29,9 @@ async def root():
 app.include_router(auth_router, prefix="/auth")
 app.include_router(procedure_router, prefix="/procedures")
 app.include_router(stripe_routes, prefix="/stripe")
+app.include_router(admin_user_router, prefix="/admin/users")
 app.include_router(image_router, prefix="/image")
 app.include_router(plan_router, prefix="/api/plans")
-
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):

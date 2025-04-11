@@ -1,11 +1,8 @@
-from app.database import db
+from app.database import image_data_collection, procedure_collection, users_collection
 from datetime import datetime
 from bson import ObjectId
 from app.utils.functions import convert_objectid_and_datetime
 
-image_data_collection = db["image_data"]
-procedure_collection = db["procedures"]
-users_collection = db["users"]
 
 
 async def create_image_data(procedure_id: str, user: str, data):

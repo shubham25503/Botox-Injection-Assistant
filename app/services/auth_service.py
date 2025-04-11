@@ -7,12 +7,11 @@ from app.models.user import User
 from app.schemas.user_schema import UserSignup, UserEdit
 from datetime import datetime, timedelta
 from app.utils.jwt_handler import create_jwt_token
-from app.database import db
+from app.database import users_collection
 import uuid, random, string
 from app.config import SMTP_USERNAME, SMTP_SERVER, SMTP_PORT, SMTP_PASSWORD
 
 
-users_collection = db["users"]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

@@ -1,9 +1,8 @@
 from app.schemas.procedure_schema import ProcedureCreate, ProcedureEdit
-from app.database import db
+from app.database import procedure_collection 
 from datetime import datetime
 from bson import ObjectId
 
-procedure_collection = db["procedures"]
 
 async def create_procedure(procedure_data: ProcedureCreate):
     procedure_dict = procedure_data.dict()

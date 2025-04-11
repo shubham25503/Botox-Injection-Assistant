@@ -56,7 +56,7 @@ def create_checkout_session(data: dict):
         return {"checkout_url": session.url}
 
     except stripe.error.CardError as e:
-        return {"error": f"Card error: {e.user_message}"}
+        return {"error": f"Card error: {e}"}
 
     except stripe.error.RateLimitError:
         return {"error": "Rate limit exceeded. Please try again later."}
