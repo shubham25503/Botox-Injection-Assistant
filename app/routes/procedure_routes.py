@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas.procedure_schema import ProcedureCreate, ProcedureEdit
-from app.services.procedure_services import create_procedure, get_all_procedures, update_procedure, delete_procedure, get_all_procedures_for_user
+from app.schemas.procedure_schema import ProcedureCreate, ProcedureEdit, ProcedureOut
+from app.services.procedure_services import create_procedure, get_all_procedures, update_procedure, get_procedure, delete_procedure, get_all_procedures_for_user
 from app.utils.dependencies import get_current_user, admin_only
 
 router = APIRouter(tags=["Procedures"])
@@ -22,6 +22,18 @@ async def list_procedures():
         print("procedures get", e)
         raise HTTPException(status_code=500, detail=str(e))
     
+
+
+
+
+@router.get("/detail/{procedure_id}", response_model=ProcedureOut)
+async def list_procedures(procedure_id: str,  current_user= Depends(get_current_user)):
+    try:
+        return await get_procedure(procedure_id)
+    except Exception as e:
+        print("procedures get", e)
+        raise HTTPException(status_code=500, detail=str(e))
+     
 # PUT: https://localhost:8080/procudure/id -> request body {} 
 
 @router.get("/all/{user_id}", dependencies=[Depends(get_current_user)])
