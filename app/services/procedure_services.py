@@ -1,11 +1,13 @@
 from app.schemas.procedure_schema import ProcedureCreate, ProcedureEdit
-from app.database import procedure_collection 
+from app.database import procedure_collection, users_collection 
 from datetime import datetime
 from bson import ObjectId
 
 
-async def create_procedure(procedure_data: ProcedureCreate):
+async def create_procedure(procedure_data: ProcedureCreate, current_user):
     procedure_dict = procedure_data.dict()
+    current_user=await users_collection.find_one({"email":current_user["email"]})
+    procedure_dict["doctor_id"]=current_user["_id"]
     if isinstance(procedure_dict["procedure_date"], datetime):
         pass
     else:
@@ -18,6 +20,15 @@ async def get_all_procedures():
     async for procedure in procedure_collection.find():
         procedure["_id"] = str(procedure["_id"])
         procedures.append(procedure)
+    return procedures
+
+async def get_all_procedures_for_user(user_id):
+    procedures = []
+    async for procedure in procedure_collection.find({"doctor_id": ObjectId(user_id)}):
+        procedure["_id"] = str(procedure["_id"])
+        procedure["doctor_id"] = str(procedure["doctor_id"])
+        procedures.append(procedure)
+    
     return procedures
 
 async def update_procedure(procedure_id:str,data:ProcedureEdit):
