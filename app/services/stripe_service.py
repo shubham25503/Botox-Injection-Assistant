@@ -15,7 +15,7 @@ def fetch_products():
             product = price["product"]
             product_list.append({
                 "product_name": product["name"],
-                "description": product["description"],
+                "description": price["nickname"],
                 "price_id": price["id"],
                 "amount": price["unit_amount"] / 100,
                 "currency": price["currency"],
