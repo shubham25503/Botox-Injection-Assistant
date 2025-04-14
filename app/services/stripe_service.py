@@ -33,7 +33,11 @@ def fetch_products():
 async def get_payment_details(data:dict):
     existing_user = await users_collection.find_one({"email": data["email"]})
     updates={"payment_status":data["is_payment_success"]}
-    existing_user.update(updates)
+    await users_collection.update_one(
+            {"email": data["email"]},
+            {"$set": updates}
+        )
+    
         
 
 

@@ -30,16 +30,21 @@ async def create_user(user_data: UserSignup, is_admin=False):
             updates["password"] = hash_password(user_data.password)
         if user_data.username:
             updates["username"] = user_data.username
+        
         updates["payment_status"]=None
+        if user_data.username:
+            updates["username"]= user_data.username
         if updates:
-            existing_user.update(updates)
+            existing_user = await users_collection.find_one({"email":user_data.email})
+
         token = create_jwt_token({
             "email": existing_user.email,
             "is_admin":existing_user.is_admin
             })
+        existing_user["_id"]=str(existing_user["_id"])
         return {**existing_user, "access_token": token}
 
-    elif existing_user and existing_user["payment_status"]==True:
+    elif existing_user :
         raise Exception("User already exists")
 
     hashed_pw = hash_password(user_data.password)
