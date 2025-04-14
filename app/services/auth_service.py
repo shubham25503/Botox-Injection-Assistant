@@ -75,7 +75,7 @@ async def update_user(user_email: str, user_update: UserEdit):
         updates["password"] = hash_password(user_update.password)
     if user_update.username:
         updates["username"]= user_update.username
-        
+
     if updates:
         await users_collection.update_one(
             {"email": user_email},
@@ -92,10 +92,12 @@ async def authenticate_user(email: str, password: str):
         return None
     # if not user["is_admin"] and user["access_expires"] < datetime.now():
     #     raise Exception("Access expired. Please renew.")
-    return create_jwt_token({
+    user["_id"]=str(user["_id"])
+    token = create_jwt_token({
         "email": user["email"],
         "is_admin": user["is_admin"]
         })
+    return {**user, "access_token": token}
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)

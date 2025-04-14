@@ -21,14 +21,14 @@ async def signup(user: UserSignup):
 @router.post("/login")
 async def login(user: UserLogin):
     try:
-        token = await authenticate_user(user.email, user.password)
-        if not token:
+        result = await authenticate_user(user.email, user.password)
+        if not result:
             raise HTTPException(status_code=401, detail=handle_exception(e, "Invalid email or password", 401))
-        return create_response(200,True,"Login Successfully",{"access_token": token})
+        return create_response(200,True,"Login Successfully",result)
     
     except Exception as e:
         print("login", e)
-        raise HTTPException(status_code=401, detail=handle_exception(e, "Error creating user", 401))
+        raise HTTPException(status_code=401, detail=handle_exception(e, "Error Login user", 401))
 
 
 @router.post("/token")
