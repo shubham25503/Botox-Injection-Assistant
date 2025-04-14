@@ -4,15 +4,16 @@ from datetime import datetime
 from bson import ObjectId
 from fastapi import HTTPException
 
-async def create_procedure(procedure_data: ProcedureCreate, current_user):
-    procedure_dict = procedure_data.dict()
-    current_user=await users_collection.find_one({"email":current_user["email"]})
-    procedure_dict["doctor_id"]=current_user["_id"]
-    if isinstance(procedure_dict["procedure_date"], datetime):
+async def create_procedure(procedure_data: dict, current_user):
+    current_user = await users_collection.find_one({"email": current_user["email"]})
+    procedure_data["doctor_id"] = current_user["_id"]
+    
+    if isinstance(procedure_data["procedure_date"], datetime):
         pass
     else:
-        procedure_dict["procedure_date"] = datetime.combine(procedure_dict["procedure_date"], datetime.min.time())
-    result = await procedure_collection.insert_one(procedure_dict)
+        procedure_data["procedure_date"] = datetime.combine(procedure_data["procedure_date"], datetime.min.time())
+    
+    result = await procedure_collection.insert_one(procedure_data)
     return str(result.inserted_id)
 
 async def get_all_procedures():
