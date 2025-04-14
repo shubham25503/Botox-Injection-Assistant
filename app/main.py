@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from app.utils.functions import handle_exception
 from app.routes.auth_routes import router as auth_router
 from fastapi.responses import JSONResponse
 from app.routes.procedure_routes import router as procedure_router
@@ -33,11 +34,13 @@ app.include_router(admin_user_router, prefix="/admin/users")
 app.include_router(image_router, prefix="/image")
 app.include_router(plan_router, prefix="/api/plans")
 
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
-    return JSONResponse(
+    return HTTPException(
         status_code=500,
-        content={"error": "An unexpected error occurred on the server.", "details": str(exc)}
+        detail=handle_exception(HTTPException(), "An unexpected error occurred on the server.",500)
     )
 
 
