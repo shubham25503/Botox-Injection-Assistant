@@ -16,14 +16,14 @@ def create_jwt_token(data: dict):
     token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     return token  
 
-def get_current_user_email(token: str = Depends(oauth2_scheme)) -> str:
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        # print(payload)
-        # print(payload.get("sub"))
-        return payload.get("email")
-    except JWTError:
-        raise HTTPException(status_code=403, detail="Invalid token")
+# def get_current_user_email(token: str = Depends(oauth2_scheme)) -> str:
+#     try:
+#         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+#         print(payload)
+#         # print(payload.get("sub"))
+#         return payload.get("email")
+#     except JWTError:
+#         raise HTTPException(status_code=403, detail="Invalid token")
     
 
 def verify_token(token: str):

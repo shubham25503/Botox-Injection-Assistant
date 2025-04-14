@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.user_schema import UserLogin, UserOut, UserSignup, UserEdit, ResetPassword, UserOut2
 from app.services.auth_service import create_user, authenticate_user,  update_user, forgot_password, get_data
-from app.utils.jwt_handler import get_current_user_email
+# from app.utils.jwt_handler import get_current_user_email
+from app.utils.dependencies import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
 from app.utils.functions import create_response, handle_exception
 
@@ -51,11 +52,11 @@ async def reset_password(data: ResetPassword):
         raise HTTPException(status_code=400, detail=handle_exception(e,"email can't be sent"))
 
 # @router.put("/edit", response_model=UserOut)
-@router.put("/edit")
-async def edit_user(data: UserEdit, user_email: str = Depends(get_current_user_email)):
+@router.put("/edit/{user_id}", dependencies=[Depends(get_current_user)])
+async def edit_user(data: UserEdit, user_id: str):
     try:
         # print(user_email)
-        updated = await update_user(user_email, data)
+        updated = await update_user(user_id, data)
         return create_response(200,True,"User data Edited Successfully",updated)
     except Exception as e:
         print("edit", e)
@@ -63,10 +64,10 @@ async def edit_user(data: UserEdit, user_email: str = Depends(get_current_user_e
     
 
 # @router.get("/user/details", response_model=UserOut2)
-@router.get("/user/details")
-async def get_user_data(user_email:str = Depends(get_current_user_email)):
+@router.get("/user/details/{user_id}", dependencies=[Depends(get_current_user)])
+async def get_user_data(user_id:str):
     try:
-        data=await get_data(user_email)
+        data=await get_data(user_id)
         return create_response(200,True,"user data fetched",data)
     except Exception as e:
         print("get-data", e)

@@ -10,7 +10,7 @@ from app.utils.jwt_handler import create_jwt_token
 from app.database import users_collection
 import uuid, random, string
 from app.config import SMTP_USERNAME, SMTP_SERVER, SMTP_PORT, SMTP_PASSWORD
-
+from bson import ObjectId
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -62,11 +62,11 @@ async def create_user(user_data: UserSignup, is_admin=False):
         })
     return {**user.dict(), "access_token": token}
 
-
-async def update_user(email: str, user_update: UserEdit):
-    existing_user = await users_collection.find_one({"email": email})
+async def update_user(user_id: str, user_update: UserEdit):
+    existing_user = await users_collection.find_one({"_id": ObjectId(user_id)})
     if not existing_user:
         raise Exception("User doesn't exists")
+
     updates = {}
 
     if user_update.email:
@@ -75,9 +75,13 @@ async def update_user(email: str, user_update: UserEdit):
         updates["password"] = hash_password(user_update.password)
 
     if updates:
-        await users_collection.update_one({"email": email}, {"$set": updates})
-        existing_user.update(updates)  # update local dict with changes
-
+        await users_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": updates}
+        )
+        # Fetch the updated user again to return
+        existing_user = await users_collection.find_one({"_id": ObjectId(user_id)})
+    existing_user["_id"] = str(existing_user["_id"])
     return existing_user
 
 async def authenticate_user(email: str, password: str):
@@ -97,9 +101,9 @@ def hash_password(password: str) -> str:
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
-async def get_data(email):
-    existing_user= await users_collection.find_one({"email": email})
-    existing_user["id"]=str(existing_user["_id"])
+async def get_data(user_id):
+    existing_user= await users_collection.find_one({"_id": ObjectId(user_id)})
+    existing_user["_id"]=str(existing_user["_id"])
     if not existing_user:
         raise Exception("User doesn't exist")
     return existing_user

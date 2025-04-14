@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from app.utils.functions import handle_exception
+from app.utils.functions import handle_exception, create_response
 from app.routes.auth_routes import router as auth_router
 from fastapi.responses import JSONResponse
 from app.routes.procedure_routes import router as procedure_router
@@ -38,10 +38,7 @@ app.include_router(websocket_router, prefix="/ws")
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
-    return HTTPException(
-        status_code=500,
-        detail=handle_exception(HTTPException(), "An unexpected error occurred on the server.",500)
-    )
+    return create_response(500,False,"Internal Server Error")
 
 
 # #websocket
