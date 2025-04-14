@@ -26,7 +26,7 @@ face_mesh = mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_con
 mp_drawing = mp.solutions.drawing_utils
 
 
-@router.websocket("/ws/cursor")
+@router.websocket("/cursor")
 async def websocket_cursor(websocket: WebSocket):
     await websocket.accept()
     active_connections.append(websocket)
@@ -43,7 +43,7 @@ async def websocket_cursor(websocket: WebSocket):
 # Cache for smoothing landmark positions
 landmark_cache = {}
 
-@router.websocket("/ws/stream")
+@router.websocket("/stream")
 async def video_ws(websocket: WebSocket):
     await websocket.accept()
     hovered_point = None

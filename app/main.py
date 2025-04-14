@@ -8,7 +8,7 @@ from app.routes.plan_routes import router as plan_router
 from app.routes.stripe_routes import router as stripe_routes
 from app.routes.admin_user_routes import router as admin_user_router
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.routes.websocket_routes import router as websocket_router
 
 app = FastAPI(title="Botox-Injection-Predictor")
 
@@ -33,7 +33,7 @@ app.include_router(stripe_routes, prefix="/stripe")
 app.include_router(admin_user_router, prefix="/admin/users")
 app.include_router(image_router, prefix="/image")
 app.include_router(plan_router, prefix="/api/plans")
-
+app.include_router(websocket_router, prefix="/ws")
 
 
 @app.exception_handler(Exception)
