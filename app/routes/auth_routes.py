@@ -52,11 +52,11 @@ async def reset_password(data: ResetPassword):
         raise HTTPException(status_code=400, detail=handle_exception(e,"email can't be sent"))
 
 # @router.put("/edit", response_model=UserOut)
-@router.put("/edit/{user_id}", dependencies=[Depends(get_current_user)])
-async def edit_user(data: UserEdit, user_id: str):
+@router.put("/edit/{user_email}", dependencies=[Depends(get_current_user)])
+async def edit_user(data: UserEdit, user_email: str):
     try:
         # print(user_email)
-        updated = await update_user(user_id, data)
+        updated = await update_user(user_email, data)
         return create_response(200,True,"User data Edited Successfully",updated)
     except Exception as e:
         print("edit", e)
@@ -64,10 +64,10 @@ async def edit_user(data: UserEdit, user_id: str):
     
 
 # @router.get("/user/details", response_model=UserOut2)
-@router.get("/user/details/{user_id}", dependencies=[Depends(get_current_user)])
-async def get_user_data(user_id:str):
+@router.get("/user/details/{user_email}", dependencies=[Depends(get_current_user)])
+async def get_user_data(user_email:str):
     try:
-        data=await get_data(user_id)
+        data=await get_data(user_email)
         return create_response(200,True,"user data fetched",data)
     except Exception as e:
         print("get-data", e)

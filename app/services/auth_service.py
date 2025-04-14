@@ -62,8 +62,8 @@ async def create_user(user_data: UserSignup, is_admin=False):
         })
     return {**user.dict(), "access_token": token}
 
-async def update_user(user_id: str, user_update: UserEdit):
-    existing_user = await users_collection.find_one({"_id": ObjectId(user_id)})
+async def update_user(user_email: str, user_update: UserEdit):
+    existing_user = await users_collection.find_one({"email":user_email})
     if not existing_user:
         raise Exception("User doesn't exists")
 
@@ -73,14 +73,16 @@ async def update_user(user_id: str, user_update: UserEdit):
         updates["email"] = user_update.email
     if user_update.password:
         updates["password"] = hash_password(user_update.password)
-
+    if user_update.username:
+        updates["username"]= user_update.username
+        
     if updates:
         await users_collection.update_one(
-            {"_id": ObjectId(user_id)},
+            {"email": user_email},
             {"$set": updates}
         )
         # Fetch the updated user again to return
-        existing_user = await users_collection.find_one({"_id": ObjectId(user_id)})
+        existing_user = await users_collection.find_one({"email":user_email})
     existing_user["_id"] = str(existing_user["_id"])
     return existing_user
 
@@ -101,8 +103,8 @@ def hash_password(password: str) -> str:
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
-async def get_data(user_id):
-    existing_user= await users_collection.find_one({"_id": ObjectId(user_id)})
+async def get_data(user_email):
+    existing_user= await users_collection.find_one({"email": user_email})
     existing_user["_id"]=str(existing_user["_id"])
     if not existing_user:
         raise Exception("User doesn't exist")
