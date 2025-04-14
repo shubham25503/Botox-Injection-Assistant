@@ -15,7 +15,7 @@ class ProcedureEdit(BaseModel):
     patient_name: Optional[str] = None
     institution_name: Optional[str]= None
     procedure_date: Optional[datetime]= None
-    injection_areas: Optional[List[str]]=[]
+    injection_areas: Optional[List[str]]=None
 
 
 class ProcedureOut(BaseModel):
