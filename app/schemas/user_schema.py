@@ -6,6 +6,7 @@ class UserSignup(BaseModel):
     username:str
     email: EmailStr
     password: str
+    payment_status : Optional[bool] =None
     # plan: str = "monthly" # monthly, semiannual, annual
 
 

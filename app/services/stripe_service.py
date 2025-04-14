@@ -1,6 +1,6 @@
 import stripe
 from app.config import STRIPE_SECRET_KEY
-
+from app.database import users_collection
 stripe.api_key = STRIPE_SECRET_KEY
 
 def fetch_products():
@@ -30,22 +30,35 @@ def fetch_products():
     except Exception as e:
         return {"error": "An unexpected error occurred while fetching products."}
 
+async def get_payment_details(data:dict):
+    existing_user = await users_collection.find_one({"email": data["email"]})
+    updates={"payment_status":data["is_payment_success"]}
+    existing_user.update(updates)
+        
 
 
-
-def create_checkout_session(data: dict):
+async def create_checkout_session(data: dict):
     try:
+        email = data.get("email")
+        existing_user = await users_collection.find_one({"email": email})
         price_id = data.get("price_id")
         quantity = data.get("quantity")
         success_url = data.get("success_url")
         cancel_url = data.get("cancel_url")
-
+        print(email,existing_user)
         if not all([price_id, quantity, success_url, cancel_url]):
             raise ValueError("Missing required data fields for checkout session.")
+
+        customer = stripe.Customer.create(
+            email=email,
+            name= existing_user["username"], 
+            metadata={"your_user_id": str(existing_user["_id"])}
+        )
 
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             mode="subscription",
+            customer=customer.id,
             line_items=[{
                 "price": price_id,
                 "quantity": quantity
@@ -53,7 +66,7 @@ def create_checkout_session(data: dict):
             success_url=success_url,
             cancel_url=cancel_url
         )
-        return {"checkout_url": session.url}
+        return {"checkout_url": session.url, "customer_id": customer.id}
 
     except stripe.error.CardError as e:
         return {"error": f"Card error: {e}"}
@@ -77,4 +90,5 @@ def create_checkout_session(data: dict):
         return {"error": str(e)}
 
     except Exception as e:
+        print(e)
         return {"error": "An unexpected error occurred while creating the checkout session."}
