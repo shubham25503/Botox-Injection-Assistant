@@ -26,7 +26,7 @@ def create_response(
         "status": status_code,
         "success": success,
         "message": message,
-        "result": result if isinstance(result, dict) else {"data": result},  
+        "result": result if isinstance(result, dict) else {"data": result} if isinstance(result, list) else None,  
         "timestamp": datetime.now().isoformat() 
     }
     return response
@@ -47,3 +47,8 @@ def convert_objectid_and_datetime(doc):
         elif isinstance(value, dict):
             doc[key] = convert_objectid_and_datetime(value)
     return doc
+
+def objectid_to_str(obj):
+    if isinstance(obj, ObjectId):
+        return str(obj)
+    raise TypeError(f"Object of type {obj.__class__.__name__} is not serializable")

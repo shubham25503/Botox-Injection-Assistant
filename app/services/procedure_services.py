@@ -3,6 +3,9 @@ from app.database import procedure_collection, users_collection
 from datetime import datetime
 from bson import ObjectId
 from fastapi import HTTPException
+from app.utils.functions import objectid_to_str
+from fastapi.encoders import jsonable_encoder
+
 
 async def create_procedure(procedure_data: dict, current_user):
     current_user = await users_collection.find_one({"email": current_user["email"]})
@@ -19,9 +22,9 @@ async def create_procedure(procedure_data: dict, current_user):
 async def get_all_procedures():
     procedures = []
     async for procedure in procedure_collection.find():
-        procedure["_id"] = str(procedure["_id"])
         procedures.append(procedure)
-    return procedures
+    # Use jsonable_encoder to handle serialization of ObjectId and other special cases
+    return jsonable_encoder(procedures, custom_encoder={ObjectId: objectid_to_str})
 
 async def get_procedure(procedure_id: str):
     procedure = await procedure_collection.find_one({"_id": ObjectId(procedure_id)})
@@ -40,27 +43,8 @@ async def get_all_procedures_for_user(user_id):
     
     return procedures
 
-async def update_procedure(procedure_id:str,data:ProcedureEdit):
-    if not procedure_id:
-        raise ValueError("Procedure ID is required.")
 
-    update_data = {k: v for k, v in data.dict().items() if v is not None}
-
-    if "procedure_date" in update_data:
-        update_data["procedure_date"] = datetime.combine(update_data["procedure_date"], datetime.min.time())
-
-    # update_data["updated_at"] = datetime.now()
-
-    result = await procedure_collection.update_one(
-        {"_id": ObjectId(procedure_id)},
-        {"$set": update_data}
-    )
-
-    if result.matched_count == 0:
-        raise ValueError("No procedure found with the given ID.")
-
-    return True
-
+    
 async def delete_procedure(procedure_id:str):
     if not procedure_id:
         raise ValueError("Procedure ID is required.")

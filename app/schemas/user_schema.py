@@ -11,7 +11,7 @@ class UserSignup(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 class UserEdit(BaseModel):

@@ -1,11 +1,15 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.procedure_schema import ProcedureCreate, ProcedureEdit, ProcedureOut
-from app.services.procedure_services import create_procedure, get_all_procedures, update_procedure, get_procedure, delete_procedure, get_all_procedures_for_user
+from app.services.procedure_services import create_procedure, get_all_procedures, get_procedure, delete_procedure, get_all_procedures_for_user
 from app.utils.dependencies import get_current_user, admin_only
 from app.utils.functions import create_response, handle_exception
 from fastapi import APIRouter, Depends, Form, UploadFile, File
 from typing import List
+from typing import Optional
 from datetime import datetime
+from app.database import procedure_collection
+from bson import ObjectId
+import os
 
 router = APIRouter(tags=["Procedures"])
 
@@ -22,7 +26,12 @@ async def add_procedure(
     current_user=Depends(get_current_user)
 ):
     try:
-        image_path = f"uploads/{image.filename}"
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        os.chdir(os.path.dirname(current_dir))
+        new_current_dir = os.getcwd()
+        patient_dir = os.path.join(new_current_dir, f"uploads/{patient_name}")
+        os.makedirs(patient_dir, exist_ok=True)
+        image_path = os.path.join(patient_dir, f"dose_0.jpg")
         with open(image_path, "wb") as f:
             f.write(await image.read())
 
@@ -49,7 +58,8 @@ async def add_procedure(
 @router.get("/",  dependencies=[Depends(admin_only)])
 async def list_procedures():
     try:
-        return  create_response(200, True,"",await get_all_procedures())
+        data=await get_all_procedures()
+        return  create_response(200, True,"",data)
     except Exception as e:
         print("procedures get", e)
         raise HTTPException(status_code=500, detail=handle_exception(e,"",500))
@@ -78,15 +88,49 @@ async def list_procedures(user_id:str):
         raise HTTPException(status_code=500, detail=handle_exception(e,"",500))
 
 
-@router.put("/{procedure_id}",   dependencies=[Depends(get_current_user)])
-async def edit_procedures(procedure_id:str,data: ProcedureEdit):
+
+@router.put("/{procedure_id}", dependencies=[Depends(get_current_user)])
+async def edit_procedure(
+    procedure_id: str,
+    patient_name: Optional[str] = Form(None),
+    patient_gender: Optional[str] = Form(None),
+    patient_age: Optional[int] = Form(None),
+    institution_name: Optional[str] = Form(None),
+    procedure_date: Optional[datetime] = Form(None),
+    injection_areas: Optional[List[str]] = Form(None)
+):
     try:
-        updated=await update_procedure(procedure_id,data)
-        if updated:
-            return  create_response(200, True,"",{"status":"Update Successful"})
+        update_data = {}
+        if patient_name is not None:
+            update_data["patient_name"] = patient_name
+        if patient_gender is not None:
+            update_data["patient_gender"] = patient_gender
+        if patient_age is not None:
+            update_data["patient_age"] = patient_age
+        if institution_name is not None:
+            update_data["institution_name"] = institution_name
+        if procedure_date is not None:
+            update_data["procedure_date"] = datetime.combine(procedure_date, datetime.min.time())
+        if injection_areas is not None:
+            update_data["injection_areas"] = injection_areas
+
+        if not update_data:
+            raise ValueError("No fields provided for update.")
+
+        result = await procedure_collection.update_one(
+            {"_id": ObjectId(procedure_id)},
+            {"$set": update_data}
+        )
+
+        if result.matched_count == 0:
+            raise ValueError("No procedure found with the given ID.")
+
+        return create_response(200, True, "", {"status": "Update Successful"})
+
     except Exception as e:
         print("procedures put", e)
-        raise HTTPException(status_code=500, detail=handle_exception(e,"",500))
+        raise HTTPException(status_code=500, detail=handle_exception(e, ""))
+    
 
 @router.delete("/{procedure_id}", dependencies=[Depends(get_current_user)])
 async def delete_procedures(procedure_id:str):
