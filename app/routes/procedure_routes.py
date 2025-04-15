@@ -107,7 +107,7 @@ async def edit_procedure(
     procedure_id: str,
     patient_name: Optional[str] = Form(None),
     patient_gender: Optional[str] = Form(None),
-    patient_notes:str=Form(...),
+    patient_notes:Optional[str]=Form(None),
     patient_age: Optional[int] = Form(None),
     institution_name: Optional[str] = Form(None),
     procedure_date: Optional[datetime] = Form(None),
