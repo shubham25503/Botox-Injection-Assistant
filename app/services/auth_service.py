@@ -42,6 +42,7 @@ async def create_user(user_data: UserSignup, is_admin=False):
             "is_admin":existing_user.is_admin
             })
         existing_user["_id"]=str(existing_user["_id"])
+        # print(existing_user)
         return {**existing_user, "access_token": token}
 
     elif existing_user :
@@ -65,7 +66,10 @@ async def create_user(user_data: UserSignup, is_admin=False):
         "email": user.email,
         "is_admin":user.is_admin
         })
-    return {**user.dict(), "access_token": token}
+    existing_user = await users_collection.find_one({"email": user_data.email})
+    existing_user["_id"]=str(existing_user["_id"])
+
+    return {**existing_user, "access_token": token}
 
 async def update_user(user_email: str, user_update: UserEdit):
     existing_user = await users_collection.find_one({"email":user_email})

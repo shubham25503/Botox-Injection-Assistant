@@ -13,6 +13,7 @@ router = APIRouter(tags=["auth"])
 async def signup(user: UserSignup):
     try:
         new_user =await create_user(user)
+        # print("\n\n",new_user)
         return create_response(200,True,"User Created Successfully",new_user)
     except Exception as e:
         print("signup",e)
