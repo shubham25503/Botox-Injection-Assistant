@@ -10,7 +10,7 @@ from app.utils.functions import create_response, handle_exception
 
 router = APIRouter(tags=["Admin Users"])
 
-@router.get("/", response_model=List[AdminUserResponse])
+@router.get("/")
 async def list_users(current_user=Depends(admin_only)):
     try:
         return create_response(200, True, "", await get_all_users(users_collection))

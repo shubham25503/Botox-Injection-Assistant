@@ -3,22 +3,22 @@ from bson import ObjectId, errors
 from app.schemas.admin_user_schema import AdminUserResponse, AdminUserUpdate
 from fastapi import HTTPException
 
-async def get_all_users(users_collection) -> List[AdminUserResponse]:
+async def get_all_users(users_collection):
     try:
         users = []
         async for user in users_collection.find({}):
-            user["id"] = str(user["_id"])
-            users.append(AdminUserResponse(**user))
+            user["_id"] = str(user["_id"])
+            users.append({**user})
         return users
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching users: {str(e)}")
 
-async def get_user_by_id(users_collection, user_id: str) -> Optional[AdminUserResponse]:
+async def get_user_by_id(users_collection, user_id: str) :
     try:
         user = await users_collection.find_one({"_id": ObjectId(user_id)})
         if user:
-            user["id"] = str(user["_id"])
-            return AdminUserResponse(**user)
+            user["_id"] = str(user["_id"])
+            return {**user}
         return None
     except errors.InvalidId:
         raise HTTPException(status_code=400, detail="Invalid user ID format")

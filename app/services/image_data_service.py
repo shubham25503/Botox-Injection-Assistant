@@ -2,8 +2,9 @@ from app.database import image_data_collection, procedure_collection, users_coll
 from datetime import datetime
 from bson import ObjectId
 from app.utils.functions import convert_objectid_and_datetime
-
-
+from app.config import STABLE_DIFFUSION
+import json
+import requests
 
 async def create_image_data(procedure_id: str, user: str, data):
     # print(procedure_id,doctor_data,data)
@@ -43,10 +44,34 @@ async def update_image_data(procedure_id: str, data):
     if result.matched_count == 0:
         raise Exception("Image data not found.")
 
-async def get_image_data(procedure_id: str):
-    data = await image_data_collection.find_one({"procedure_id": ObjectId(procedure_id), "is_deleted": False})
-    if not data:
+async def get_image_generated(procedure_id: str):
+    url=STABLE_DIFFUSION
+    responses=[]
+    data = await procedure_collection.find_one({"_id": ObjectId(procedure_id), "is_deleted": False})
+    if not data["image_path"]:
         raise Exception("Image data not found.")
-    data["id"] = str(data["_id"])
-    del data["_id"]
-    return convert_objectid_and_datetime(data)
+    file_path=data["image_path"]
+    injection_areas_data = json.loads(data["injection_areas"])
+    for area in injection_areas_data:
+        payload={
+            'injection_number': area["units"],  # Ensure this is a string representation of an integer
+            'selected_area': area["name"]  
+        }
+        files = {
+            'file': open(file_path, 'rb')
+        }
+
+        response = requests.post(url, data=payload, files=files)
+        try:
+            result_data = response.json()
+        except Exception:
+            result_data = {"raw_response": response.text}
+
+        result_data["injection_number"] = area["units"]
+        result_data["selected_area"] = area["name"]
+
+
+        responses.append(result_data)
+    # data["_id"] = str(data["_id"])
+    # return convert_objectid_and_datetime(data)
+    return responses
