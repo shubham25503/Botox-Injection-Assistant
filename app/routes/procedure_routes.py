@@ -127,7 +127,7 @@ async def edit_procedure(
         if result.matched_count == 0:
             raise ValueError("No procedure found with the given ID.")
 
-        return create_response(200, True, "", {"status": "Update Successful"})
+        return create_response(200, True, "Update Successful", {"status": "Update Successful"})
 
     except Exception as e:
         print("procedures put", e)

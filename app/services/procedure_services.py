@@ -25,7 +25,9 @@ async def create_procedure(procedure_data: dict, current_user):
 async def get_all_procedures():
     procedures = []
     async for procedure in procedure_collection.find():
-        procedures.append(procedure)
+        if not procedure["is_deleted"]:
+            del procedure["is_deleted"]
+            procedures.append(procedure)
     # Use jsonable_encoder to handle serialization of ObjectId and other special cases
     return jsonable_encoder(procedures, custom_encoder={ObjectId: objectid_to_str})
 
@@ -43,7 +45,9 @@ async def get_all_procedures_for_user(user_id):
     async for procedure in procedure_collection.find({"doctor_id": ObjectId(user_id)}):
         procedure["_id"] = str(procedure["_id"])
         procedure["doctor_id"] = str(procedure["doctor_id"])
-        procedures.append(procedure)
+        if not procedure["is_deleted"]:
+            del procedure["is_deleted"]
+            procedures.append(procedure)
     
     return procedures
 
