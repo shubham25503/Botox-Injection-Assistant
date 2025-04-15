@@ -107,6 +107,7 @@ async def edit_procedure(
     procedure_id: str,
     patient_name: Optional[str] = Form(None),
     patient_gender: Optional[str] = Form(None),
+    patient_notes:str=Form(...),
     patient_age: Optional[int] = Form(None),
     institution_name: Optional[str] = Form(None),
     procedure_date: Optional[datetime] = Form(None),
@@ -120,6 +121,8 @@ async def edit_procedure(
             update_data["patient_gender"] = patient_gender
         if patient_age is not None:
             update_data["patient_age"] = patient_age
+        if patient_notes is not None:
+            update_data["patient_notes"] = patient_notes
         if institution_name is not None:
             update_data["institution_name"] = institution_name
         if procedure_date is not None:
