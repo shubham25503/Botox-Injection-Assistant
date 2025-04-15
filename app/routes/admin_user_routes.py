@@ -17,7 +17,7 @@ async def list_users(current_user=Depends(admin_only)):
     except Exception as e:
         raise HTTPException(status_code=500,detail=handle_exception(e,f"Failed to fetch users: {str(e)}",500) )
 
-@router.get("/{user_id}", response_model=AdminUserResponse)
+@router.get("/{user_id}")
 async def get_user(user_id: str, current_user=Depends(admin_only)):
     try:
         user = await get_user_by_id(users_collection, user_id)
