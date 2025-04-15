@@ -10,15 +10,7 @@ import os
 async def create_procedure(procedure_data: dict, current_user):
     current_user = await users_collection.find_one({"email": current_user["email"]})
     procedure_data["doctor_id"] = current_user["_id"]
-    if "," in procedure_data["injection_areas"][0] and len(procedure_data["injection_areas"])!=8:
-        procedure_data["temp_list"]=procedure_data["injection_areas"][0].split(",")
-        if len(procedure_data["temp_list"])== 8:
-            procedure_data["injection_areas"]=procedure_data["temp_list"]
-            del procedure_data["temp_list"]
-    
-    else:
-        raise HTTPException(status_code=500)
-    
+
     if isinstance(procedure_data["procedure_date"], datetime):
         pass
     else:

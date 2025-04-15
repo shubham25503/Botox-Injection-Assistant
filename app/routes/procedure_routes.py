@@ -21,7 +21,7 @@ async def add_procedure(
     patient_notes:str=Form(...),
     institution_name: str = Form(...),
     procedure_date: datetime = Form(...),
-    injection_areas: List[str] = Form(...),
+    injection_areas: str = Form(...),
     image: UploadFile = File(...),
     is_deleted: bool = Form(False),
     current_user=Depends(get_current_user)
@@ -110,8 +110,7 @@ async def edit_procedure(
     patient_notes:Optional[str]=Form(None),
     patient_age: Optional[int] = Form(None),
     institution_name: Optional[str] = Form(None),
-    procedure_date: Optional[datetime] = Form(None),
-    injection_areas: Optional[List[str]] = Form(None)
+    injection_areas: Optional[str] = Form(None)
 ):
     try:
         update_data = {}
@@ -125,18 +124,8 @@ async def edit_procedure(
             update_data["patient_notes"] = patient_notes
         if institution_name is not None:
             update_data["institution_name"] = institution_name
-        if procedure_date is not None:
-            update_data["procedure_date"] = datetime.combine(procedure_date, datetime.min.time())
         if injection_areas is not None:
             update_data["injection_areas"] = injection_areas
-            if "," in update_data["injection_areas"][0] and len(update_data["injection_areas"])!=8:
-                update_data["temp_list"]=update_data["injection_areas"][0].split(",")
-                if len(update_data["temp_list"])== 8:
-                    update_data["injection_areas"]=update_data["temp_list"]
-                    del update_data["temp_list"]    
-            else:
-                raise HTTPException(status_code=500)
-            
 
         if not update_data:
             raise ValueError("No fields provided for update.")
