@@ -18,6 +18,7 @@ async def add_procedure(
     patient_name: str = Form(...),
     patient_gender: str = Form(...),
     patient_age: int = Form(...),
+    patient_notes:str=Form(...),
     institution_name: str = Form(...),
     procedure_date: datetime = Form(...),
     injection_areas: List[str] = Form(...),
@@ -39,6 +40,7 @@ async def add_procedure(
             "patient_name": patient_name,
             "patient_gender": patient_gender,
             "patient_age": patient_age,
+            "patient_notes":patient_notes,
             "institution_name": institution_name,
             "procedure_date": procedure_date,
             "injection_areas": injection_areas,
@@ -124,10 +126,19 @@ async def edit_procedure(
             update_data["procedure_date"] = datetime.combine(procedure_date, datetime.min.time())
         if injection_areas is not None:
             update_data["injection_areas"] = injection_areas
+            if "," in update_data["injection_areas"][0] and len(update_data["injection_areas"])!=8:
+                update_data["temp_list"]=update_data["injection_areas"][0].split(",")
+                if len(update_data["temp_list"])== 8:
+                    update_data["injection_areas"]=update_data["temp_list"]
+                    del update_data["temp_list"]    
+            else:
+                raise HTTPException(status_code=500)
+            
 
         if not update_data:
             raise ValueError("No fields provided for update.")
 
+        
         result = await procedure_collection.update_one(
             {"_id": ObjectId(procedure_id)},
             {"$set": update_data}
