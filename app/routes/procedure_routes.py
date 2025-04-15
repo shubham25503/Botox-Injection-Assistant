@@ -46,8 +46,9 @@ async def add_procedure(
             "is_deleted": is_deleted
         }
 
-        procedure_id = await create_procedure(procedure_data, current_user)
-        return create_response(200, True, "", {"procedure_id": procedure_id})
+        procedure = await create_procedure(procedure_data, current_user)
+        procedure["procedure_id"]=procedure["_id"]
+        return create_response(200, True, "", procedure)
 
     except Exception as e:
         print("procedures post", e)
@@ -72,7 +73,8 @@ async def list_procedures():
 @router.get("/detail/{procedure_id}")
 async def list_procedures(procedure_id: str,  current_user= Depends(get_current_user)):
     try:
-        return  create_response(200, True,"",await get_procedure(procedure_id))
+        data=await get_procedure(procedure_id)
+        return  create_response(200, True,"",data)
     except Exception as e:
         print("procedures get", e)
         raise HTTPException(status_code=500, detail=handle_exception(e,"",500))

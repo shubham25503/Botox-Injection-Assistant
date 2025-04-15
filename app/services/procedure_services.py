@@ -17,7 +17,10 @@ async def create_procedure(procedure_data: dict, current_user):
         procedure_data["procedure_date"] = datetime.combine(procedure_data["procedure_date"], datetime.min.time())
     
     result = await procedure_collection.insert_one(procedure_data)
-    return str(result.inserted_id)
+    data =await procedure_collection.find_one({"_id":result.inserted_id})
+    data["_id"]=str(data["_id"])
+    data["doctor_id"]=str(data["doctor_id"])
+    return data
 
 async def get_all_procedures():
     procedures = []
@@ -31,8 +34,9 @@ async def get_procedure(procedure_id: str):
     if not procedure:
         raise HTTPException(status_code=404, detail="Procedure not found")
     
-    procedure['id'] = str(procedure['_id'])  # Optional for frontend
-    return ProcedureOut(**procedure)
+    procedure['_id'] = str(procedure['_id'])  # Optional for frontend
+    procedure['doctor_id'] = str(procedure['doctor_id'])  # Optional for frontend
+    return {**procedure}
 
 async def get_all_procedures_for_user(user_id):
     procedures = []
