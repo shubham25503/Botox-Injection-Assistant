@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.procedure_schema import ProcedureCreate, ProcedureEdit, ProcedureOut
-from app.services.procedure_services import create_procedure, get_all_procedures, get_procedure, delete_procedure, get_all_procedures_for_user
+from app.services.procedure_services import edit_image_procedure, create_procedure, get_all_procedures, get_procedure, delete_procedure, get_all_procedures_for_user
 from app.utils.dependencies import get_current_user, admin_only
 from app.utils.functions import create_response, handle_exception
 from fastapi import APIRouter, Depends, Form, UploadFile, File
@@ -89,7 +89,16 @@ async def list_procedures(user_id:str):
         print("procedures get", e)
         raise HTTPException(status_code=500, detail=handle_exception(e,"",500))
 
-
+@router.put("/change-image/{procedure_id}", dependencies=[Depends(get_current_user)])
+async def edit_image(
+    procedure_id: str,
+    image: UploadFile = File(...)
+    ):
+    try:
+        return create_response(200, True, "Image updated successfully", await edit_image_procedure(procedure_id,image))
+    except Exception as e :
+        print("edit_image error:", e)
+        raise HTTPException(status_code=500, detail=handle_exception(e, ""))
 
 @router.put("/{procedure_id}", dependencies=[Depends(get_current_user)])
 async def edit_procedure(
