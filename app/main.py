@@ -29,9 +29,9 @@ async def root():
 
 app.include_router(auth_router, prefix="/auth")
 app.include_router(procedure_router, prefix="/procedures")
+app.include_router(admin_user_router, prefix="/admin/users")
 app.include_router(image_router, prefix="/image")
 app.include_router(stripe_routes, prefix="/stripe")
-app.include_router(admin_user_router, prefix="/admin/users")
 app.include_router(plan_router, prefix="/api/plans")
 app.include_router(websocket_router, prefix="/ws")
 

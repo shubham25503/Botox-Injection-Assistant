@@ -8,9 +8,10 @@ class AdminUserBase(BaseModel):
     is_admin: bool = False
 
 class AdminUserUpdate(BaseModel):
-    username: Optional[str]
+    username: Optional[str] = None
     email: Optional[EmailStr]=None
     is_admin: Optional[bool]=None
+    password : Optional[str] = None
 
 class AdminUserResponse(AdminUserBase):
     id: str

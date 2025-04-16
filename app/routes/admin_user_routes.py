@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.utils.dependencies import admin_only
+from app.schemas.user_schema import UserSignup
 from app.database import users_collection
 from app.services.admin_user_service import (
-    get_all_users, get_user_by_id, update_user, delete_user
+    get_all_users, get_user_by_id, update_user, delete_user, create_user
 )
 from app.schemas.admin_user_schema import AdminUserResponse, AdminUserUpdate
 from app.utils.functions import create_response, handle_exception
@@ -26,6 +27,19 @@ async def get_user(user_id: str, current_user=Depends(admin_only)):
         return create_response(200, True, "", user)
     except Exception as e:
         raise HTTPException(status_code=500, detail=handle_exception(e,f"Failed to fetch user: {str(e)}",500))
+
+@router.post("/{user_id}")
+async def create_user_admin(user: UserSignup, current_user=Depends(admin_only)):
+    try:
+        print(user)
+        new_user = await create_user(users_collection, user)
+        return create_response(200,True,"User Created Successfully",new_user)
+    except Exception as e:
+        print("signup",e)
+        raise HTTPException(status_code=400, detail=handle_exception(e, "Error creating user"))
+
+
+
 
 @router.put("/{user_id}")
 async def update_user_info(user_id: str, update_data: AdminUserUpdate, current_user=Depends(admin_only)):
