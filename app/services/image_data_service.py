@@ -71,8 +71,8 @@ async def get_image_generated(procedure_id: str):
                 result_data = {"raw_response": response.text}
 
             result_data["units"] = area["units"]
-            result_data["selected_area"] = area["name"]
-
+            result_data["name"] = area["name"]
+            result_data["display"] = area["display"]
 
             responses.append(result_data)
     # data["_id"] = str(data["_id"])
