@@ -6,7 +6,8 @@ from app.models.user import User
 from app.schemas.user_schema import UserSignup
 from app.utils.jwt_handler import create_jwt_token
 from passlib.context import CryptContext
-
+from app.database import users_collection, procedure_collection
+from datetime import datetime
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -48,6 +49,9 @@ async def update_user(users_collection, user_id: str, update_data: AdminUserUpda
 
 async def delete_user(users_collection, user_id: str, current_user):
     try:
+        if str(current_user["_id"])==str(user_id):
+            raise HTTPException(status_code=400, detail="You can't Delete yourself")
+    
         result = await users_collection.delete_one({"_id": ObjectId(user_id)})
         return result.deleted_count > 0
     except errors.InvalidId:
@@ -77,6 +81,23 @@ async def create_user(users_collection, user_data:UserSignup, is_admin=False, pa
     existing_user["_id"]=str(existing_user["_id"])
 
     return {**existing_user}
+
+async def create_procedure(user_id:str, procedure_data: dict):
+    # current_user = await users_collection.find_one({"_id": ObjectId(user_id)})
+    # procedure_data["doctor_id"] = current_user["_id"]
+    procedure_data["doctor_id"] = user_id
+
+    if isinstance(procedure_data["procedure_date"], datetime):
+        pass
+    else:
+        procedure_data["procedure_date"] = datetime.combine(procedure_data["procedure_date"], datetime.min.time())
+    
+    result = await procedure_collection.insert_one(procedure_data)
+    data =await procedure_collection.find_one({"_id":result.inserted_id})
+    data["_id"]=str(data["_id"])
+    data["doctor_id"]=str(data["doctor_id"])
+    return data
+
 
 
 def hash_password(password: str) -> str:

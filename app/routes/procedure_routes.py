@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas.procedure_schema import ProcedureCreate, ProcedureEdit, ProcedureOut
+# from app.schemas.procedure_schema import ProcedureCreate, ProcedureEdit, ProcedureOut
 from app.services.procedure_services import edit_image_procedure, create_procedure, get_all_procedures, get_procedure, delete_procedure, get_all_procedures_for_user
 from app.utils.dependencies import get_current_user, admin_only
 from app.utils.functions import create_response, handle_exception
@@ -49,7 +49,7 @@ async def add_procedure(
         }
 
         procedure = await create_procedure(procedure_data, current_user)
-        procedure["procedure_id"]=procedure["_id"]
+        procedure["_id"]=procedure["_id"]
         return create_response(200, True, "", procedure)
 
     except Exception as e:
