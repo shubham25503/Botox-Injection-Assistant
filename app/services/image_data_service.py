@@ -5,6 +5,8 @@ from app.utils.functions import convert_objectid_and_datetime
 from app.config import STABLE_DIFFUSION
 import json
 import requests
+import base64
+
 
 async def create_image_data(procedure_id: str, user: str, data):
     # print(procedure_id,doctor_data,data)
@@ -75,6 +77,18 @@ async def get_image_generated(procedure_id: str):
             result_data["display"] = area["display"]
 
             responses.append(result_data)
+    
+    with open(file_path, "rb") as f:
+        base_image_bytes = f.read()
+
+    base_image_base64 = base64.b64encode(base_image_bytes).decode("utf-8")
+ 
+    responses.append({
+        "name":"default",
+        "image":base_image_base64,
+        "selected":True,
+        "display":"Default"
+    })        
     # data["_id"] = str(data["_id"])
     # return convert_objectid_and_datetime(data)
     return responses
