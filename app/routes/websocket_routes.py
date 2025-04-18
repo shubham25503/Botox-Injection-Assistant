@@ -9,17 +9,38 @@ import json
 router = APIRouter(tags=["Web sockets"])
 
 active_connections=[]
-
 INJECTION_POINTS = {
-    "forehead_botox": [10, 151, 338, 67, 107, 336],
-    "glabella_botox": [9, 8, 168, 6, 197, 195, 5],
+    "forehead_lines_botox": [10, 151, 338, 67, 107, 336],
+    "frown_lines_glabella_botox": [9, 8, 168, 6, 197, 195, 5],
     "crows_feet_botox": [263, 362, 386, 133, 173, 156],
-    "cheek_filler": [50, 205, 425, 429],
+    "nasalis_lines_botox": [98, 327],   # Added approximate bunny line points
+    "vertical_lip_lines_botox": [61, 0, 267, 17, 84, 37],  
+    "lip_flip_botox": [0, 267, 37, 17, 287, 84],  
+    "smile_lift_botox": [61, 76, 91, 305, 290, 409],
+    "masseter_reduction_botox": [172, 58],  # Jawline points
+    "dimpled_chin_botox": [18, 83, 14],
+    "platysmal_bands_botox": [131, 50, 205, 280, 425], # Neck lower landmarks
+    "cheek_filler": [
+        50, 205, 429,   # Left cheek
+        280, 425, 449   # Right cheek
+    ],
     "smile_line_filler": [61, 91, 76, 290, 305, 409],
-    "lip_filler": [61, 146, 91, 181, 78, 95],
-    "temple_filler": [26, 54, 226, 247, 110, 338],
-    "nose_filler": [4, 5, 6, 248]
+    "lip_filler": [
+        0, 267, 37, 17, 287, 84
+    ],
+    "temple_filler": [26, 54, 226, 247, 110],
+    "nose_filler": [4,5,6,248]
 }
+# INJECTION_POINTS = {
+#     "forehead_botox": [10, 151, 338, 67, 107, 336],
+#     "glabella_botox": [9, 8, 168, 6, 197, 195, 5],
+#     "crows_feet_botox": [263, 362, 386, 133, 173, 156],
+#     "cheek_filler": [50, 205, 425, 429],
+#     "smile_line_filler": [61, 91, 76, 290, 305, 409],
+#     "lip_filler": [61, 146, 91, 181, 78, 95],
+#     "temple_filler": [26, 54, 226, 247, 110, 338],
+#     "nose_filler": [4, 5, 6, 248]
+# }
 
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -53,6 +74,14 @@ async def video_ws(websocket: WebSocket):
         message = json.loads(data)
 
         if message["type"] == "frame":
+            # print(message.get("points"))
+            points_data=json.loads(message.get("points"))
+            selected_points=[]
+            # print("points_data",points_data)
+            for point in points_data:
+                # print(point)
+                selected_points.append(point["name"])
+            # print(selected_points)
             img_data = base64.b64decode(message["frame"])
             nparr = np.frombuffer(img_data, np.uint8)
             frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -66,32 +95,39 @@ async def video_ws(websocket: WebSocket):
                 for face_landmarks in result.multi_face_landmarks:
                     h, w, _ = frame.shape
                     for name, indices in INJECTION_POINTS.items():
-                        idx = indices[0]  # only take the first point
-                        if idx < len(face_landmarks.landmark):
-                            lm = face_landmarks.landmark[idx]
-                            x, y = int(lm.x * w), int(lm.y * h)
+                        if name not in selected_points:
+                            continue  # Skip if not selected
 
-                            # Smooth using cache
-                            prev = landmark_cache.get(name)
-                            if prev:
-                                x = int(prev[0] * 0.7 + x * 0.3)
-                                y = int(prev[1] * 0.7 + y * 0.3)
+                        for idx in indices:
+                            if idx < len(face_landmarks.landmark):
+                                lm = face_landmarks.landmark[idx]
+                                x, y = int(lm.x * w), int(lm.y * h)
 
-                            landmark_cache[name] = (x, y)
-                            landmark_pixel_list.append({"name": name, "x": x, "y": y})
+                                # Smooth using cache
+                                prev = landmark_cache.get(f"{name}_{idx}")
+                                if prev:
+                                    x = int(prev[0] * 0.7 + x * 0.3)
+                                    y = int(prev[1] * 0.7 + y * 0.3)
 
-                            # Draw the circle with bigger radius
-                            if name == message.get("hovered"):
-                                color = (0, 0, 255)
-                                radius = 8
-                            elif hovered_point == name:
-                                color = (0, 255, 0)
-                                radius = 8
-                            else:
-                                color = (0, 255, 0)
-                                radius = 6
-                            
-                            cv2.circle(frame, (x, y), radius, color, -1)
+                                landmark_cache[f"{name}_{idx}"] = (x, y)
+                                landmark_pixel_list.append({
+                                    "name": name, 
+                                    "index": idx, 
+                                    "x": x, 
+                                    "y": y
+                                })
+                                # print(landmark_pixel_list)
+                                # Draw point with color based on hover
+                                if name == message.get("hovered"):
+                                    # print(message.get("hovered"))
+                                    color = (0, 0, 255)  # red when hovered
+                                    radius = 4
+                                else:
+                                    color = (0, 255, 0)  # green otherwise
+                                    radius = 3
+
+                                cv2.circle(frame, (x, y), radius, color, -1)
+
 
             _, buffer = cv2.imencode('.jpg', frame)
             frame_b64 = base64.b64encode(buffer).decode('utf-8')
