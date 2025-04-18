@@ -89,7 +89,7 @@ async def get_image_generated(procedure_id: str):
         "selected":True,
         "display":"Default"
     })        
-    print(responses)
+    # print(responses)
     # data["_id"] = str(data["_id"])
     # return convert_objectid_and_datetime(data)
     return responses
