@@ -54,14 +54,14 @@ async def get_image_generated(procedure_id: str):
         raise Exception("Image data not found.")
     file_path=data["image_path"]
     injection_areas_data = json.loads(data["injection_areas"])
-    print(injection_areas_data)
+    # print(injection_areas_data)
     for area in injection_areas_data:
         if area["selected"]==True:
             payload={
                 'injection_number': area["units"],  # Ensure this is a string representation of an integer
                 'selected_area': area["name"]  
             }
-            print(payload)
+            # print(payload)
             files = {
                 'file': open(file_path, 'rb')
             }
@@ -89,6 +89,7 @@ async def get_image_generated(procedure_id: str):
         "selected":True,
         "display":"Default"
     })        
+    print(responses)
     # data["_id"] = str(data["_id"])
     # return convert_objectid_and_datetime(data)
     return responses
